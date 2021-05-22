@@ -4,7 +4,7 @@
 library(tidyverse)
 library(readxl)
 library(leaflet)
-
+library(sf)
 
 # levanto dataset ----------------------------------------------------------
 

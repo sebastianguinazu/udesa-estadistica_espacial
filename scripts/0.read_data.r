@@ -18,7 +18,7 @@ df_caba %>% nrow()
 df_caba %>% colnames()
 
 
-# analizo missings ---------------------------------
+# analizo missings ---------------------------------------------------
 
 df_caba %>% is.na() %>% colSums() / (df_caba %>% nrow()) * 100
 
@@ -31,30 +31,42 @@ df_caba = df_caba[keep_var]
 df_caba = df_caba  %>% 
   filter(!is.na(lat), !is.na(lon), !is.na(price))
 
-# analizo distribucion y saco outliers -------------------
 
-# desciptivo
+# analizo distribucion y creo vars ----------------------------------
+
+# desciptivo price
 df_caba$price %>% summary()
+
+# genero variable de precio por m2
+df_caba = df_caba %>%
+  mutate(pricem2 = price / surface_total) %>% 
+  filter(!is.na(surface_total) & !is.na(rooms) 
+         & !is.na(bathrooms) & !is.na(surface_covered))
+
+# desciptivo pricem2
+df_caba$pricem2 %>% summary()
+
+# saco outliers ------------------------------------------------------
 
 # Eliminamos outliers
-q_75 = quantile(df_caba$price, probs = 0.75, na.rm = TRUE)
-iqr = IQR(df_caba$price, na.rm = TRUE)
+q_75 = quantile(df_caba$pricem2, probs = 0.75, na.rm = TRUE)
+iqr = IQR(df_caba$pricem2, na.rm = TRUE)
 
 df_caba <- df_caba %>% 
-  filter(price > 20000,
-         price < (q_75 + 1.5 * iqr))
+  filter(pricem2 > 1000,
+         pricem2 < (q_75 + 1.5 * iqr))
 
-df_caba$price %>% summary()
+df_caba$pricem2 %>% summary()
 
 ggplot() +
   geom_histogram(data = df_caba,
-                 aes(x = price), bins = 50)
+                 aes(x = pricem2), bins = 50)
 
 ggplot() +
   geom_boxplot(data = df_caba,
-               aes(x = price))
+               aes(x = pricem2))
 
-qqnorm(df_caba$price)
+qqnorm(df_caba$pricem2)
 
 
 # guardo base final
