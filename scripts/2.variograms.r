@@ -36,16 +36,17 @@ train_ind = sample(seq_len(nrow(propcaba_geo_df)), size = smp_size)
 propcaba_geo_train = propcaba_geo_df[train_ind, ]
 propcaba_geo_test = propcaba_geo_df[-train_ind, ]
 
-
 # calculo regresiones para sacar tendencia (lo uso mas adelante) ----------
 
 # entreno un modelo para sacar la tendencia 
 modt = lm(pricem2 ~ X + Y, data = propcaba_geo_train)
+summary(modt)
 propcaba_geo_train$pricem2_wt = modt$residuals
 
 # entreno un modelo para sacar la tendencia (lo uso mas adelante)
 modtcov = lm(pricem2 ~ X + Y + surface_total + rooms + surface_covered + bathrooms,
           data = propcaba_geo_train)
+summary(modtcov)
 propcaba_geo_train$pricem2_wt_cov = modtcov$residuals
 
 # veo distribucion
@@ -58,13 +59,34 @@ ggplot(propcaba_geo_train) +
 ggplot(propcaba_geo_train) +
   geom_histogram(aes(x = pricem2_wt_cov))
 
-
-# variograma simple --------------------------------------------------------
-
 # lo paso a sp
 propcaba_geo_sp = propcaba_geo_train
 coordinates(propcaba_geo_sp) = ~X+Y
 class(propcaba_geo_sp)
+
+# revisar autocorrelacion e isotropia --------------------------------------
+
+propcaba_geo_gd = as.geodata(propcaba_geo_train[sample(nrow(propcaba_geo_train), 1e4),]
+                             , coords.col = 26:27, data.col=25)
+plot(propcaba_geo_gd) # no deberia haber tendencia.
+
+# para calcular los variogramas direccionales:
+# agregamos la var: "dir" y le pasamos un valor en radianes (pi/4) por ej.
+# agregamos la var: "tol" y le damos la tolerancia en radianes tambien.
+v1 = variog(propcaba_geo_gd, dir=0)
+v2 = variog(propcaba_geo_gd, dir=pi/4)
+# los graficamos juntos para compararlos y ver si son isotropicos:
+par(mfrow=c(1,2))
+plot(v1)
+plot(v2)
+
+vario.varias = plot(variog4(propcaba_geo_gd, uvec = seq(0,5,l=11)))
+
+# comparar varianza por comuna
+
+
+
+# variograma simple --------------------------------------------------------
 
 # practico
 v_wt = variogram(pricem2~1, propcaba_geo_sp)
@@ -128,6 +150,9 @@ attr(v_t_sph, 'SSErr') # 3.899825e+19
 # ajusto el variograma practico
 v_tcov = variogram(pricem2_wt_cov ~ 1, propcaba_geo_sp)
 plot(v_tcov, main = '2')
+
+# v_tcov = variogram(pricem2 ~ X + Y + surface_total + rooms + surface_covered + bathrooms, propcaba_geo_sp)
+# plot(v_tcov, main = '2')
 
 # teorico exponensial
 v_tcov_exp = fit.variogram(v_tcov, vgm(5e5, "Exp", 0.1, 3e5))
