@@ -51,5 +51,5 @@ ggplot() +
   geom_sf(data = propcaba_geo)
 
 # salvo dataset
-saveRDS(propcaba_geo, 'data/propcaba_geo')
+saveRDS(propcaba_geo, 'data/propcaba_geo.RDS')
 

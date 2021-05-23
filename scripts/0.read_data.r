@@ -8,12 +8,11 @@ df = read_csv('raw/ar_properties.csv')
 df %>% head()
 
 # caba ventas
-
 df_caba = df %>% filter(l2 == 'Capital Federal',
-                        operation_type == 'Venta')
+                        operation_type == 'Venta',
+                        property_type %in% c('Casa', 'Departamento', 'PH'))
 
-df_caba %>% nrow()
-# 172997
+df_caba %>% nrow() # 172997
 
 df_caba %>% colnames()
 
@@ -29,7 +28,11 @@ df_caba = df_caba[keep_var]
 
 # los que no tienen lat, long y price los saco
 df_caba = df_caba  %>% 
-  filter(!is.na(lat), !is.na(lon), !is.na(price))
+  filter(!is.na(lat), !is.na(lon), !is.na(price), !is.na(rooms),
+         !is.na(bathrooms), !is.na(surface_total), !is.na(surface_covered),
+         !is.na(bedrooms))
+
+df_caba %>% nrow() # 66081
 
 
 # analizo distribucion y creo vars ----------------------------------
@@ -46,9 +49,10 @@ df_caba = df_caba %>%
 # desciptivo pricem2
 df_caba$pricem2 %>% summary()
 
+
 # saco outliers ------------------------------------------------------
 
-# Eliminamos outliers
+# eliminamos outliers
 q_75 = quantile(df_caba$pricem2, probs = 0.75, na.rm = TRUE)
 iqr = IQR(df_caba$pricem2, na.rm = TRUE)
 
@@ -68,6 +72,6 @@ ggplot() +
 
 qqnorm(df_caba$pricem2)
 
-
 # guardo base final
 saveRDS(df_caba, 'data/df_caba.rds')
+
