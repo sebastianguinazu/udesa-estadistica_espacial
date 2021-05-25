@@ -36,6 +36,9 @@ ggplot() +
 
 # parto en train y test -------------------------------------------------------
 
+# todas las decisiones las voy a tomar sobre la muestra de train
+# la muestra de test se va a usar al final para comparar modelos
+
 # 70% of the sample size
 smp_size = floor(0.85 * nrow(propcaba_geo_df))
 
@@ -54,7 +57,7 @@ modt = lm(pricem2 ~ X + Y, data = propcaba_geo_train)
 summary(modt)
 propcaba_geo_train$pricem2_wt = modt$residuals
 
-# entreno un modelo para sacar la tendencia (lo uso mas adelante)
+# entreno un modelo para sacar la tendencia con covariables
 modtcov = lm(pricem2 ~ X + Y + surface_total + rooms + surface_covered + bathrooms,
           data = propcaba_geo_train)
 summary(modtcov)
@@ -92,7 +95,7 @@ moran.test(propcaba_geo_train$pricem2, nb2listw(grilla, style = "W"),randomisati
 # p-value < 2.2e-16 -> se rechaza la HN de que no hay autocorrelacion
 
 
-# variable origial: isotropia -----------------------
+# variable origial: isotropia -------------------------------------------------
 
 # analizo tendencia con x e y
 ggplot(propcaba_geo_train, aes(x = X, y = pricem2)) +
@@ -129,7 +132,7 @@ propcaba_geo_train %>% group_by(comunas) %>%
             comunas_n = n()) %>% filter(barrio> 100) %>% View()
 
 
-# variable sin tendencia: isotropia -----------------
+# variable sin tendencia: isotropia -------------------------------------------
 
 # analizo tendencia con x e y
 ggplot(propcaba_geo_train, aes(x = X, y = pricem2_wt)) +
