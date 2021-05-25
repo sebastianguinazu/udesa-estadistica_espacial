@@ -61,16 +61,16 @@ propcaba_mod_sp = SpatialPointsDataFrame(jitter(coordinates(propcaba_mod_sp),fac
 
 # empirico
 v_wt = variogram(pricem2~1, propcaba_dev_sp)
-plot(v_wt, main = '1')
+plot(v_wt, main = 'Variograma con variable original')
 
 # teorico exponencial
 v_wt_exp = fit.variogram(v_wt, vgm(5.5e5, "Exp", 0.1, 3e5))
-plot(v_wt, v_wt_exp)
+plot(v_wt, v_wt_exp, main = 'Variograma con variable original y modelo Exp')
 attr(v_wt_exp, 'SSErr') # 2.548332e+19
 
 # teorico esferico
 v_wt_sph = fit.variogram(v_wt, vgm(5.5e5, "Sph", 0.1, 3e5))
-plot(v_wt, v_wt_sph)
+plot(v_wt, v_wt_sph, main = 'Variograma con variable original y modelo Sph')
 attr(v_wt_sph, 'SSErr') # 5.402098e+19
 
 
@@ -78,16 +78,16 @@ attr(v_wt_sph, 'SSErr') # 5.402098e+19
 
 # ajusto el variograma empirico
 v_t = variogram(pricem2_wt ~ 1, propcaba_dev_sp)
-plot(v_t, main = '2')
+plot(v_t, main = 'Variograma con variable sin trend')
 
 # teorico exponencial
 v_t_exp = fit.variogram(v_t, vgm(5e5, "Exp", 0.1, 3e5))
-plot(v_t, v_t_exp)
+plot(v_t, v_t_exp, main = 'Variograma con variable sin trend y modelo Exp')
 attr(v_t_exp, 'SSErr') # 1.270442e+19
 
 # teorico esferico
 v_t_sph = fit.variogram(v_t, vgm(5e5, "Sph", 0.1, 3e5))
-plot(v_t, v_t_sph)
+plot(v_t, v_t_sph, main = 'Variograma con variable sin trend y modelo Sph')
 attr(v_t_sph, 'SSErr') # 1.263963e+19
 
 # # ajusto el variograma empirico
@@ -109,16 +109,16 @@ attr(v_t_sph, 'SSErr') # 1.263963e+19
 
 # ajusto el variograma empirico
 v_tcov = variogram(pricem2_wt_cov ~ 1, propcaba_dev_sp)
-plot(v_tcov, main = '2')
+plot(v_tcov, main = 'Variograma con var sin trend y covs')
 
 # teorico exponencial
 v_tcov_exp = fit.variogram(v_tcov, vgm(4.5e5, "Exp", 0.1, 3e5))
-plot(v_tcov, v_tcov_exp)
+plot(v_tcov, v_tcov_exp, main = 'Variograma con variable sin trend y cov Exp')
 attr(v_tcov_exp, 'SSErr') # 1.513218e+19
 
 # teorico esferico
 v_tcov_sph = fit.variogram(v_tcov, vgm(4.5e5, "Sph", 0.1, 3e5))
-plot(v_tcov, v_tcov_sph2)
+plot(v_tcov, v_tcov_sph, main = 'Variograma con variable sin trend y cov Exp')
 attr(v_tcov_sph, 'SSErr') # 1.04601e+19
 
 # # ajusto el variograma empirico
@@ -167,20 +167,6 @@ sum(!is.na(krg_t$var1.pred)) # 10290
 propcaba_mod_sp$pricem2_pred_t = krg_t$var1.pred
 mean((propcaba_mod_sp$pricem2_wt-propcaba_mod_sp$pricem2_pred_t)^2) # 264.799
 
-# # con tendencia (que resuelva todo el krige)
-# krg_t2 = krige(pricem2~X+Y,
-#               propcaba_dev_sp,
-#               propcaba_mod_sp,
-#               model = v_t_exp2,
-#               nmax = 20,
-#               nmin = 10)
-# 
-# length(krg_t2$var1.pred) # 10290
-# sum(!is.na(krg_t2$var1.pred)) # 10290
-# 
-# propcaba_mod_sp$pricem2_pred_t2 = krg_t2$var1.pred
-# mean((propcaba_mod_sp$pricem2-propcaba_mod_sp$pricem2_pred_t2)^2) # 266.077
-
 # con tendencia y covariables
 krg_tcov = krige(pricem2_wt_cov~1,
               propcaba_dev_sp,
@@ -210,4 +196,4 @@ var_list = list('v_wt_exp' = v_wt_exp,
                 'v_t_exp' = v_t_exp, 
                 'v_tcov_exp' = v_tcov_exp)
 
- saveRDS(var_list, 'models/var_list.RDS')
+saveRDS(var_list, 'models/var_list.RDS')
