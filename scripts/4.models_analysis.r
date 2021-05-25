@@ -62,9 +62,9 @@ summary(modtcov)
 
 # modelo 0. benchmark: modelo lineal simple -----------------------------------
 
-modtcov = lm(pricem2 ~ X + Y + surface_total + rooms + surface_covered + bathrooms,
+modbase = lm(pricem2 ~ X + Y + surface_total + rooms + surface_covered + bathrooms,
              data = propcaba_test_df)
-propcaba_test_df$pricem2_pred = predict(modtcov, propcaba_test_df)
+propcaba_test_df$pricem2_pred = predict(modbase, propcaba_test_df)
 propcaba_test_df$pricem2_res = propcaba_test_df$pricem2 - propcaba_test_df$pricem2_pred
 
 mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred)^2) # 405.803
@@ -110,7 +110,7 @@ mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred_t_f)^2) # 264216
 propcaba_test_df$pricem2_pred_t_f = predict(modt2, propcaba_test_df)
 
 # performance
-mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred_t_f)^2) # 246913
+mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred_t_f)^2) # 246.913
 
 
 # modelo 3: modelo geo con tendencia + modelo lineal con covariables ----------
