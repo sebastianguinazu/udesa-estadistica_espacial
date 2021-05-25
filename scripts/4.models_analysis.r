@@ -40,8 +40,9 @@ propcaba_test_sp = SpatialPointsDataFrame(jitter(coordinates(propcaba_test_sp),f
 
 # reentreno modelo lineal usando residuos -------------------------------------
 
-# esto lo hacemos con el dataset mod, que guarda las predicciones del kriging
-# del script3 que se construyo con el dataset dev
+# entrenamos modelos con el dataset mod, que guarda las predicciones del kriging
+# del script3 que se construyo con el dataset dev. luego estos modelos se usan
+# para comparar la performance predictiva final con el dataset test
 
 # a. entreno un modelo con la prediccion sin tendencia sin covs
 modt = lm(pricem2 ~ X + Y + pricem2_pred_t, data = propcaba_mod_df)
@@ -81,8 +82,8 @@ krg_wt = krige(pricem2 ~ 1,
 length(krg_wt$var1.pred) # 9080
 sum(!is.na(krg_wt$var1.pred)) # 9080
 
-propcaba_test_df$pricem2_pred = krg_wt$var1.pred
-mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred)^2) # 263.872
+propcaba_test_df$pricem2_pred_wt = krg_wt$var1.pred
+mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred_wt)^2) # 263.872
 
 
 # modelo 2.a. modelo geo con la prediccion sin tendencia ----------------------
@@ -133,8 +134,22 @@ propcaba_test_df$pricem2_pred_tcov_f = predict(modtcov, propcaba_test_df)
 mean((propcaba_test_df$pricem2-propcaba_test_df$pricem2_pred_tcov_f)^2) # 243.888
 
 
+# comparo coeficientes de regresion (analisis de sesgo) -----------------------
 
-# bonus track: calculo el modelo sin tendencia directo con el kriging ---------
+# entreno modelo sin tratamiento geo
+modbase = lm(pricem2 ~ X + Y + surface_total + rooms + surface_covered + 
+               bathrooms,
+             data = propcaba_mod_df)
+modbase$coefficients
+
+# armo dataframe con los coeficientes
+modcof_comp = cbind(c(modbase$coefficients, NA),
+                    modtcov$coefficients) %>% 
+  as.data.frame() %>% 
+  mutate(dif = V1 - V2)
+
+
+# bonus: calculo el modelo sin tendencia directo con el kriging ---------------
 
 # primero tengo que calcular el variograma
 v_t2 = variogram(pricem2~X+Y, propcaba_dev_sp)
